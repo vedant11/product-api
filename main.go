@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/vedant11/product-api/handlers"
 )
 
@@ -16,13 +17,18 @@ import (
 func main() {
 
 	l := log.New(os.Stdout, "products-api ", log.LstdFlags)
+	ph := handlers.NewPH(l)
 
-	// create the handlers
-	ph := handlers.NewProducts(l)
+	sm := mux.NewRouter()
 
-	// create a new serve mux and register the handlers
-	sm := http.NewServeMux()
-	sm.Handle("/", ph)
+	getMux := sm.Methods(http.MethodGet).Subrouter()
+	getMux.HandleFunc("/", ph.GetProducts)
+
+	putMux := sm.Methods(http.MethodPut).Subrouter()
+	putMux.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+
+	postMux := sm.Methods(http.MethodPost).Subrouter()
+	postMux.HandleFunc("/", ph.AddProduct)
 
 	// create a new server
 	s := http.Server{

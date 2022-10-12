@@ -5,61 +5,72 @@
 // Schemes: http
 // BasePath: /
 // Version: 1.0.0
+// License: MIT http://opensource.org/licenses/MIT
 //
 // Consumes:
 // - application/json
 //
 // Produces:
 // - application/json
+//
 // swagger:meta
 package handlers
 
 import (
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/vedant11/product-api/data"
 )
-
-// swagger: route GET /products products listProducts
-// Returns a list of products
-// responses:
-// 	200:productResponse
 
 type ProductsHandler struct {
 	l *log.Logger
 }
 
-func NewProducts(l *log.Logger) *ProductsHandler {
+func NewPH(l *log.Logger) *ProductsHandler {
 	return &ProductsHandler{l}
 }
-func (p *ProductsHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		p.getProducts(rw, r)
-		return
-	}
-	if r.Method == http.MethodPost {
-		p.addProduct(rw, r)
-		return
-	}
-	rw.WriteHeader(http.StatusNotImplemented)
-}
 
-// returns the products from data store
-func (p *ProductsHandler) getProducts(rw http.ResponseWriter, r *http.Request) {
+// swagger:route GET /products products listproducts
+// Returns a list of Products
+// responses:
+//
+//	200: productsResponse
+//
+// GetProducts returns the product from the data store
+func (p *ProductsHandler) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	lp := data.GetProducts()
-	// d, err := json.Marshal(lp)
-	// JSON encoding instead of Marshal
 	err := lp.ToJSON(rw)
 	if err != nil {
 		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
 	}
 }
-func (p *ProductsHandler) addProduct(rw http.ResponseWriter, r *http.Request) {
+func (p *ProductsHandler) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	prod := data.Product{}
 	err := prod.FromJSON(r.Body)
 	if err != nil {
 		http.Error(rw, "Unable to parse the request", http.StatusBadRequest)
 	}
 	data.AddProduct(&prod)
+}
+func (p *ProductsHandler) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	id_int, _ := strconv.Atoi(id)
+	prod := data.Product{ID: id_int}
+	err := prod.FromJSON(r.Body)
+	if err != nil {
+		http.Error(rw, "Unable to parse the request", http.StatusBadRequest)
+	}
+	err = data.UpdateProduct(&prod)
+	if err == data.ErrProductNotFound {
+		http.Error(rw, "Product not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(rw, "Product not found", http.StatusInternalServerError)
+		return
+	}
 }
