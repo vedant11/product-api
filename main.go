@@ -23,6 +23,8 @@ func main() {
 
 	getMux := sm.Methods(http.MethodGet).Subrouter()
 	getMux.HandleFunc("/", ph.GetProducts)
+	getMux.Handle("/docs.html", http.FileServer(http.Dir("./static/")))
+	getMux.Handle("/swagger.yaml", http.FileServer(http.Dir("./static/")))
 
 	putMux := sm.Methods(http.MethodPut).Subrouter()
 	putMux.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)

@@ -9,3 +9,11 @@ type productsResponse struct {
 	// in:body
 	Body []data.Product
 }
+
+// swagger:parameters updateProduct
+type updateResponse struct {
+	// ALl products in the system
+	// in:path
+	// required:true
+	Body []data.Product
+}

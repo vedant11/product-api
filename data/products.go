@@ -7,7 +7,12 @@ import (
 	"time"
 )
 
+// Product defines the structure for a Product API
+// swagger:model
 type Product struct {
+	// the id of the user
+	// required:true
+	// min: 1
 	ID          int     `json:"id"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`

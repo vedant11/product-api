@@ -55,6 +55,14 @@ func (p *ProductsHandler) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	}
 	data.AddProduct(&prod)
 }
+
+// swagger:route PUT /products/{id} products updateProduct
+// Changes a Product
+// responses:
+//
+//	201: updateResponse
+//
+// UpdateProducts returns the product from the data store
 func (p *ProductsHandler) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
